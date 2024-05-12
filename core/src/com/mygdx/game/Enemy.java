@@ -34,9 +34,9 @@ public class Enemy {
             y = MathUtils.random(0, Main.SCR_HEIGHT/2);
             break;
         }
-        v = MathUtils.random(2f, 5f);
+        v = MathUtils.random(0.5f, 1.2f);
         a = MathUtils.atan((x-Base.xB)/(y-Base.yB));
-        rotation = a*MathUtils.radiansToDegrees;
+        rotation = -a*MathUtils.radiansToDegrees;
         vx = MathUtils.sin(a)*v;
         vy = MathUtils.cos(a)*v;
     }
