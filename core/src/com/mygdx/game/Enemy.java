@@ -11,6 +11,7 @@ public class Enemy {
     float x = 0, y = 0;
     float vx = 2, vy;
     float width, height;
+    float targetX, targetY;
 
     boolean statusActive = true;
 
@@ -34,8 +35,10 @@ public class Enemy {
             y = MathUtils.random(0, Main.SCR_HEIGHT/2);
             break;
         }
-        v = MathUtils.random(0.5f, 1.2f);
-        a = MathUtils.atan((x-Base.xB)/(y-Base.yB));
+        targetX = MathUtils.random(Main.SCR_WIDTH/7*2, Main.SCR_WIDTH/7*3.5f);
+        targetY = MathUtils.random(Main.SCR_HEIGHT-300, Main.SCR_HEIGHT-200);
+        v = MathUtils.random(1f, 2f);
+        a = MathUtils.atan((x-targetX)/(y-targetY));
         rotation = -a*MathUtils.radiansToDegrees;
         vx = MathUtils.sin(a)*v;
         vy = MathUtils.cos(a)*v;
@@ -46,7 +49,7 @@ public class Enemy {
             y += vy;
             this.x = x;
             this.y = y;
-            if (y >= Main.SCR_HEIGHT/3*2) {
+            if (x >= Main.SCR_WIDTH/7*3-75 & x <= Main.SCR_WIDTH/7*4+75) {
                 attack();
             }
         }

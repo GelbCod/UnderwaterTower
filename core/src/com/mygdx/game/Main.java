@@ -14,7 +14,7 @@ public class Main extends ApplicationAdapter {
 	Texture imgTurret;
 	OrthographicCamera camera;
 
-	public static Enemy[] enemy = new Enemy[5];
+	public static Enemy[] enemy = new Enemy[250];
 	Turret[] turret = new Turret[4];
 	
 	@Override
@@ -55,7 +55,7 @@ public class Main extends ApplicationAdapter {
 			1, 1, enemy[i].rotation, 0, 0, 256, 256, false, false);
 		}
 		for (int i = 0; i < turret.length; i++) {
-			batch.draw(imgTurret, turret[i].turX, turret[i].turY, turret[i].width/2, turret[i].height/2, turret[i].width, turret[i].height, 1, 1, turret[i].a, 0, 0, 48, 32, false, false);
+			batch.draw(imgTurret, turret[i].turX, turret[i].turY, 16, 16, turret[i].width, turret[i].height, 1, 1, turret[i].a, 0, 0, 48, 32, false, false);
 		}
 		batch.end();
 	}
