@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -18,19 +19,33 @@ public class Main extends ApplicationAdapter {
 	Texture imgTurret;
 	OrthographicCamera camera;
 
-	public static Enemy[] enemy = new Enemy[5];
+	public static Enemy[] enemy = new Enemy[2];
 	Turret[] turret = new Turret[TURRETT_COUNT];
 
 	ArrayList<Bullet> bullets;
 
-	//private float fireDelay;
 	private float[] turretFireDelay = new float[TURRETT_COUNT];
+	private Sound one_turret_shut;
+	private Sound hit;
+	private Texture bg;
+	// Функция проверки на столкновения
+	boolean checkForCollision(Enemy enemy){
+		for (Bullet bullet : bullets){
+			if ((enemy.x < bullet.position.x + bullet.width) && (bullet.position.x < enemy.x + enemy.width) && (enemy.y < bullet.position.y + bullet.height) && (bullet.position.y < enemy.y + enemy.height)){
+				bullet.deactivate = true;
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
-		img = new Texture("badlogic.jpg");
+		img = new Texture("enemy.png");
 		imgTurret = new Texture("turret.png");
+		bg = new Texture("bg.png");
 		camera = new OrthographicCamera();
 		camera.setToOrtho(false, SCR_WIDTH, SCR_HEIGHT);
 		for (int i = 0; i < enemy.length; i++) {
@@ -46,24 +61,21 @@ public class Main extends ApplicationAdapter {
 			turret[i].spawn(i);
 		}
 
-
 		bullets = new ArrayList<Bullet>();
-
-
-
+		one_turret_shut = Gdx.audio.newSound(Gdx.files.internal("one_turret_shut.ogg"));
+		hit = Gdx.audio.newSound(Gdx.files.internal("hit.ogg"));
 	}
 
 	@Override
 	public void render () {
 		ScreenUtils.clear(1, 1, 1, 1);
 
+
 		float dt = Gdx.graphics.getDeltaTime();
 
 		for (int i = 0; i < turretFireDelay.length; i++){
 			turretFireDelay[i] -= dt;
 		}
-
-
 
 		batch.setProjectionMatrix(camera.combined);
 		for (int i = 0; i < enemy.length; i++) {
@@ -74,20 +86,16 @@ public class Main extends ApplicationAdapter {
 			int indexEnemy = turret[i].getINearestEnemy();
 			turret[i].lookToEnemy(indexEnemy);
 
-
-
-//почему то стреляет только первая туррель - самая левая которая хм...теперь две 1 и 3, 2 и 4 патроной не завезли )))
 			if (turret[i].fire){
 				if (turretFireDelay[i] <= 0){
-					bullets.add(new Bullet(turret[i].turX + (turret[i].height/2), turret[i].turY + (turret[i].height/2), turret[i].eX, turret[i].eY));
-					//bullets.add(new Bullet(turret[i].barrelX, turret[i].barrelY, turret[i].eX, turret[i].eY));
+
+					bullets.add(new Bullet(turret[i].barrelEndX, turret[i].barrelEndY, turret[i].eX, turret[i].eY));
+					one_turret_shut.play();
 					turretFireDelay[i] += 0.2;
 				}
 			} else {
 				turretFireDelay[i] = 0;
 			}
-
-
 
 		}
 
@@ -106,7 +114,26 @@ public class Main extends ApplicationAdapter {
 			}
 		}
 
+		//коллизии
+		for (Enemy curEnemy : enemy){
+			boolean isCollision = checkForCollision(curEnemy);
+			if (isCollision){
+				curEnemy.spawn();
+				hit.play();
+			}
+		}
+
+		//Удалим пули, которые деактивировались после коллизий
+		for (Iterator<Bullet> iterator = bullets.iterator(); iterator.hasNext(); ) {
+			Bullet bullet = iterator.next();
+			if (bullet.deactivate){
+				iterator.remove();
+			}
+		}
+
 		batch.begin();
+
+		//batch.draw(bg, 0, 0);
 
 		for (int i = 0; i < enemy.length; i++) {
 			batch.draw(img, enemy[i].x, enemy[i].y, enemy[i].width/2, enemy[i].height/2, enemy[i].width, enemy[i].height,
@@ -122,11 +149,6 @@ public class Main extends ApplicationAdapter {
 		}
 
 
-
-
-
-
-
 		batch.end();
 	}
 	
@@ -135,6 +157,10 @@ public class Main extends ApplicationAdapter {
 		batch.dispose();
 		img.dispose();
 		imgTurret.dispose();
+		bg.dispose();
+
+		one_turret_shut.dispose();
+		hit.dispose();
 
 		for (Bullet bullet : bullets){
 			bullet.dispose();

@@ -3,6 +3,7 @@ package com.mygdx.game;
 import static java.lang.Math.abs;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 
 public class Turret {
     float a;
@@ -14,10 +15,16 @@ public class Turret {
     float width = 48, height = 32;
 
     float barrelX, barrelY;
-    float burrelLenghr = width - height/2;
+    float barrelEndX, barrelEndY;
+
+    float  barrelLenght = width - height/2;
+
     boolean fire;
 
-    float spaceToNearestEnemy = 0;
+    void setBarrelEnd(){
+        barrelEndX = barrelX + barrelLenght*MathUtils.cosDeg(a);
+        barrelEndY = barrelY + barrelLenght*MathUtils.sinDeg(a);
+    }
 
     void spawn(int turretNumber) {
         fire = false;
@@ -36,8 +43,10 @@ public class Turret {
             break;
         }
 
-        barrelX = turX + this.width;
+        barrelX = turX + this.height/2;
         barrelY = turY + this.height/2;
+        setBarrelEnd();
+
     }
 
     int getINearestEnemy() {
@@ -45,7 +54,6 @@ public class Turret {
         double curJ;
         int nearestEnemyNumber = 0;
         for (int i = 0; i < Main.enemy.length; i++) {
-
             curJ = Math.sqrt(Math.pow((double) (turX-Main.enemy[i].x), 2)+Math.pow((double) (turY-Main.enemy[i].y), 2));
             if (j > curJ) {
                 j = curJ;
@@ -58,10 +66,11 @@ public class Turret {
     }
 
     void lookToEnemy(int iNearestEnemy) {
-        /*eX = Main.enemy[iNearestEnemy].x;
-        eY = Main.enemy[iNearestEnemy].y;*/
+
         fire = false;
-        float rotation = MathUtils.atan((Main.enemy[iNearestEnemy].width + turX-Main.enemy[iNearestEnemy].x)/(Main.enemy[iNearestEnemy].height + Main.enemy[iNearestEnemy].y-turY))*MathUtils.radiansToDegrees;
+
+        float rotation = MathUtils.atan((barrelX - eX)/(eY - barrelY))*MathUtils.radiansToDegrees;
+
         if (rotation > curA) {
             curA += 0.5;
 
@@ -79,10 +88,12 @@ public class Turret {
         /*barrelX = turX + this.width + (float)(burrelLenghr*Math.sin(Math.toRadians(curA)));
         barrelY = turY + this.height/2 + (float)(burrelLenghr*Math.cos(Math.toRadians(curA)));*/
 
-        /*barrelX = turX + (float)(burrelLenghr*Math.sin(Math.toRadians(curA)));
-        barrelY = turY + (float)(burrelLenghr*Math.cos(Math.toRadians(curA)));*/
+        /*barrelX = turX + (float)(burrelDiag*Math.cos(Math.toRadians(this.a) + curA2));
+        barrelY = turY + (float)(burrelDiag*Math.sin(Math.toRadians(this.a) + curA2));*/
 
 
+
+        setBarrelEnd();
 
         if (Math.abs(90 + this.a - rotation) < 0.5){
             fire = true;
