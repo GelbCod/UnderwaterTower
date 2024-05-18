@@ -2,8 +2,9 @@ package com.mygdx.game;
 
 import static java.lang.Math.abs;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 
 public class Turret {
     float a;
@@ -21,6 +22,9 @@ public class Turret {
 
     boolean fire;
 
+    Texture texture;
+    Texture targetDot;
+
     void setBarrelEnd(){
         barrelEndX = barrelX + barrelLenght*MathUtils.cosDeg(a);
         barrelEndY = barrelY + barrelLenght*MathUtils.sinDeg(a);
@@ -30,18 +34,21 @@ public class Turret {
         fire = false;
         switch (turretNumber) {
             case 0: turX = (int) Main.SCR_WIDTH/5;
-            turY = (int) Main.SCR_HEIGHT-100;
-            break;
+                turY = (int) Main.SCR_HEIGHT-100;
+                break;
             case 1: turX = (int) Main.SCR_WIDTH/5*4;
-            turY = (int) Main.SCR_HEIGHT-100;
-            break;
+                turY = (int) Main.SCR_HEIGHT-100;
+                break;
             case 2: turX = (int) Main.SCR_WIDTH/7*3;
-            turY = (int) Main.SCR_HEIGHT-250;
-            break;
+                turY = (int) Main.SCR_HEIGHT-250;
+                break;
             case 3: turX = (int) Main.SCR_WIDTH/7*4;
-            turY = (int) Main.SCR_HEIGHT-250;
-            break;
+                turY = (int) Main.SCR_HEIGHT-250;
+                break;
         }
+
+        texture = new Texture("turret" + turretNumber + ".png");
+        targetDot = new Texture("targetdot" + turretNumber + ".png");
 
         barrelX = turX + this.height/2;
         barrelY = turY + this.height/2;
@@ -50,18 +57,40 @@ public class Turret {
     }
 
     int getINearestEnemy() {
+        fire = false;
         double j = 1600;
         double curJ;
         int nearestEnemyNumber = 0;
         for (int i = 0; i < Main.enemy.length; i++) {
-            curJ = Math.sqrt(Math.pow((double) (turX-Main.enemy[i].x), 2)+Math.pow((double) (turY-Main.enemy[i].y), 2));
-            if (j > curJ) {
-                j = curJ;
-                nearestEnemyNumber = i;
+            if (Main.enemy[i].x < 0 | Main.enemy[i].x > Gdx.graphics.getWidth() | Main.enemy[i].y < 0 | Main.enemy[i].y > Gdx.graphics.getHeight()) {continue;} //игнорируем врагов за пределами экрана
+
+            if (Main.enemy[i].statusActive) {
+                curJ = Math.sqrt(Math.pow((double) (turX - Main.enemy[i].x), 2) + Math.pow((double) (turY - Main.enemy[i].y), 2));
+                if (j > curJ) {
+                    j = curJ;
+                    nearestEnemyNumber = i;
+                    fire = true;
+                }
             }
+
         }
-        eX = Main.enemy[nearestEnemyNumber].x + Main.enemy[nearestEnemyNumber].width; //они нам нужны для направления новых пуль
-        eY = Main.enemy[nearestEnemyNumber].y + Main.enemy[nearestEnemyNumber].height;
+
+        //Определим угол между врагом и туррелью. Угол самого врага при этом никакой роли не играет!
+        float centerEnemyX = Main.enemy[nearestEnemyNumber].x + Main.enemy[nearestEnemyNumber].lenghtDiag;
+        float centerEnemyY = Main.enemy[nearestEnemyNumber].y + Main.enemy[nearestEnemyNumber].lenghtDiag;
+
+        float angleTurretEnemy = MathUtils.atan((barrelEndY - centerEnemyY)/(barrelEndX - centerEnemyX));
+        //Определим текущую точку прицеливания туррели
+        //плюсы минусы как-то нелогично расположены, но именно этот вариант рабочий
+        //никакие другие нормального результата не дают!
+        if (angleTurretEnemy > 0){ //противник слева
+            eX = centerEnemyX + Main.enemy[nearestEnemyNumber].lenghtDiag * MathUtils.cos(angleTurretEnemy);
+            eY = centerEnemyY + Main.enemy[nearestEnemyNumber].lenghtDiag * MathUtils.sin(angleTurretEnemy);
+        }else{
+            eX = centerEnemyX - Main.enemy[nearestEnemyNumber].lenghtDiag * MathUtils.cos(angleTurretEnemy);
+            eY = centerEnemyY - Main.enemy[nearestEnemyNumber].lenghtDiag * MathUtils.sin(angleTurretEnemy);
+        }
+
         return nearestEnemyNumber;
     }
 
@@ -83,21 +112,18 @@ public class Turret {
         }
         this.a = curA-90;
 
-        //длина от центра вращения до дульного среза
 
-        /*barrelX = turX + this.width + (float)(burrelLenghr*Math.sin(Math.toRadians(curA)));
-        barrelY = turY + this.height/2 + (float)(burrelLenghr*Math.cos(Math.toRadians(curA)));*/
-
-        /*barrelX = turX + (float)(burrelDiag*Math.cos(Math.toRadians(this.a) + curA2));
-        barrelY = turY + (float)(burrelDiag*Math.sin(Math.toRadians(this.a) + curA2));*/
-
-
-
+        //Ищем дульный срез, откуда будут вылетать пули
         setBarrelEnd();
+
 
         if (Math.abs(90 + this.a - rotation) < 0.5){
             fire = true;
         }
+    }
 
+    public void dispose(){
+        texture.dispose();
+        targetDot.dispose();
     }
 }
