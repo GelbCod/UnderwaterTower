@@ -8,8 +8,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.ScreenUtils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,7 +19,7 @@ public class Main extends ApplicationAdapter {
 	//общая громкость звука
 	private static final float MAIN_VOLUME = 0.2f;
 	public static final float SCR_HEIGHT = 900, SCR_WIDTH = 1600;
-	public static final int TURRETT_COUNT = 4;
+	public static final int TURRET_COUNT = 4;
 	long curTime = System.currentTimeMillis();
 	long startMissionTime;
 	SpriteBatch batch;
@@ -32,7 +30,7 @@ public class Main extends ApplicationAdapter {
 
 
 	public static Enemy[] enemy = new Enemy[10];
-	Turret[] turret = new Turret[TURRETT_COUNT];
+	Turret[] turret = new Turret[TURRET_COUNT];
 
 	public static BitmapFont fontMedium;
 
@@ -40,8 +38,8 @@ public class Main extends ApplicationAdapter {
 
 	ArrayList<Bullet> bullets;
 
-	private float[] turretFireDelay = new float[TURRETT_COUNT];
-	private Sound one_turret_shut;
+	private float[] turretFireDelay = new float[TURRET_COUNT];
+	private Sound one_turret_shoot;
 	private Sound hit;
 	private Sound alarm;
 	private Texture bg;
@@ -95,8 +93,8 @@ public class Main extends ApplicationAdapter {
 
 		buttonAboutExit = new Button(75, 500, 200, 50);
 		buttonMainMenuStart = new Button(75, 200, 200, 50);
-		buttonMainMenuAbout = new Button(75, 350, 200, 50);
-		buttonAboutExit = new Button(75, 500, 200, 50);
+		//buttonMainMenuAbout = new Button(75, 350, 200, 50);
+		//buttonAboutExit = new Button(75, 500, 200, 50);
 
 		camera = new OrthographicCamera();
 		camera.setToOrtho(false, SCR_WIDTH, SCR_HEIGHT);
@@ -123,13 +121,15 @@ public class Main extends ApplicationAdapter {
 		}
 
 		bullets = new ArrayList<Bullet>();
-		one_turret_shut = Gdx.audio.newSound(Gdx.files.internal("one_turret_shut.ogg"));
+		one_turret_shoot = Gdx.audio.newSound(Gdx.files.internal("one_turret_shut.ogg"));
 		hit = Gdx.audio.newSound(Gdx.files.internal("hit.ogg"));
 		alarm = Gdx.audio.newSound(Gdx.files.internal("alarm.ogg"));
 	}
 
 	@Override
 	public void render () {
+		camera.zoom += 0.01;
+		camera.update();
 		curTime = System.currentTimeMillis();
 		LDB.loadRecords();
 		batch.setProjectionMatrix(camera.combined);
@@ -138,7 +138,7 @@ public class Main extends ApplicationAdapter {
 				screenCondition = 1;
 			} else { batch.begin();
 				//ScreenUtils.clear(1, 1, 1, 1);
-				System.out.println(Gdx.input.getX() + " " +  Gdx.input.getY() + " " + Gdx.input.isTouched());
+				//System.out.println(Gdx.input.getX() + " " +  Gdx.input.getY() + " " + Gdx.input.isTouched());
 				batch.draw(mainMenuScreen, 0, 0, SCR_WIDTH, SCR_HEIGHT);
 				fontMedium.draw(batch, "Play", 75, SCR_HEIGHT-200);
 				batch.end();
@@ -164,8 +164,10 @@ public class Main extends ApplicationAdapter {
 					helper = 0;
 				}
 				float dt = Gdx.graphics.getDeltaTime();
-				if (curTime-startMissionTime >= 300000) {
+				if (curTime-startMissionTime >= 20000) {
 					screenCondition = 1;
+					contentCount += 125;
+					LDB.saveRecords();
 				}
 
 
@@ -227,7 +229,7 @@ public class Main extends ApplicationAdapter {
 					if (turret[i].fire){
 						if (turretFireDelay[i] <= 0){
 							bullets.add(new Bullet(turret[i].barrelEndX, turret[i].barrelEndY, turret[i].eX, turret[i].eY));
-							one_turret_shut.play(MAIN_VOLUME);
+							one_turret_shoot.play(MAIN_VOLUME);
 							turretFireDelay[i] += 0.2;
 						}
 					} else {
@@ -279,9 +281,9 @@ public class Main extends ApplicationAdapter {
 					batch.draw(turret[i].targetDot, turret[i].eX, turret[i].eY);
 				}
 				batch.end();
-				if (Base.health <= 0) {
+				/*if (Base.health <= 0) {
 					screenCondition = 3;
-				}
+				}*/
 				break;
 			case 3:
 				batch.begin();
@@ -294,6 +296,7 @@ public class Main extends ApplicationAdapter {
 				if (Gdx.input.isTouched()) {
 					screenCondition = 1;
 				}
+				break;
 			/*case 4:
 				batch.begin();
 				batch.draw(missionEndScreen, 0, 0, SCR_WIDTH, SCR_HEIGHT);
@@ -310,7 +313,6 @@ public class Main extends ApplicationAdapter {
 				if (Gdx.input.isTouched()) {
 					screenCondition = 1;
 				}*/
-				LDB.saveRecords();
 		}
 		batch.begin();
 		fontMedium.draw(batch, "Res:" + contentCount, 50, SCR_HEIGHT-50);
@@ -335,7 +337,7 @@ public class Main extends ApplicationAdapter {
 		}
 
 		//Диспозим звуки
-		one_turret_shut.dispose();
+		one_turret_shoot.dispose();
 		hit.dispose();
 	}
 }

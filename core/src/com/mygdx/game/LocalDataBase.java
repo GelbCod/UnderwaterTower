@@ -12,6 +12,6 @@ public class LocalDataBase {
 
     void loadRecords(){
         Preferences prefs = Gdx.app.getPreferences("UnderwaterPrefs");
-        Base.contentCount = prefs.getInteger("content");
+        Main.contentCount = prefs.getInteger("content");
     }
 }
