@@ -4,8 +4,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 
 public class Enemy {
-    int SCR_WIDTH = (int )Main.SCR_WIDTH;
-    int SCR_HEIGHT = (int )Main.SCR_HEIGHT;
+    int SCR_WIDTH = (int) Main.SCR_WIDTH;
+    int SCR_HEIGHT = (int) Main.SCR_HEIGHT;
     float v = 0; //Вектор
     float a = 0; //Альфа Угол
     float rotation = 0; //Угол поворота
@@ -90,7 +90,7 @@ public class Enemy {
             attackCountHelper = 0;
 
         }
-        Base.health -= 2/30F;
+        Base.health -= 1/15F;
     }
 
     public void dispose(){

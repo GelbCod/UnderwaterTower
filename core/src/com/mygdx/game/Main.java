@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.ScreenUtils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -45,6 +46,18 @@ public class Main extends ApplicationAdapter {
 	private Texture bg;
 	Texture foundationImg;
 	Texture missionEndScreen;
+	Texture explosion0;
+	Texture explosion1;
+	Texture explosion2;
+	Texture explosion3;
+	Texture explosion4;
+	Texture explosion5;
+	Texture explosion6;
+	Texture explosion7;
+
+	BitmapFont mainFont;
+
+
 
 	//для волн противников
 	private float chanceTimer = 0;
@@ -52,7 +65,10 @@ public class Main extends ApplicationAdapter {
 	private float gapBetweenWaves;
 	private int chanceOfWave = 0;
 	int helper;
-
+	int mouseX;
+	int mouseY;
+	int explosionTimerHelper = 0;
+	int explosionTimerHelperHelper;
 	Texture mainMenuScreen;
 	Texture failedMissionScreen;
 	Texture chooseMission;
@@ -69,16 +85,28 @@ public class Main extends ApplicationAdapter {
 
 		return false;
 	}
+	//boolean buttonMoerserIsActive = false;
 
 	Button buttonMainMenuStart;
 	Button buttonMainMenuAbout;
 	Button buttonMainMenuExit;
 	Button buttonAboutExit;
+	Button buttonEnterDevMode;
+	//Button buttonMoerser;
 
 	NewMissionMark[] missionMark = new NewMissionMark[3];
 
 	@Override
 	public void create () {
+		mainFont = new BitmapFont(Gdx.files.internal("beastimpact.fnt"));
+		explosion0 = new Texture("explosion0.png");
+		explosion1 = new Texture("explosion1.png");
+		explosion2 = new Texture("explosion2.png");
+		explosion3 = new Texture("explosion3.png");
+		explosion4 = new Texture("explosion4.png");
+		explosion5 = new Texture("explosion5.png");
+		explosion6 = new Texture("explosion6.png");
+		explosion7 = new Texture("explosion7.png");
 		missionEndScreen = new Texture("missionacomp.png");
 		foundationImg = new Texture("base.png");
 		fontMedium = new BitmapFont();
@@ -93,6 +121,8 @@ public class Main extends ApplicationAdapter {
 
 		buttonAboutExit = new Button(75, 500, 200, 50);
 		buttonMainMenuStart = new Button(75, 200, 200, 50);
+		buttonEnterDevMode = new Button(SCR_WIDTH-200, SCR_HEIGHT-125, 200, 125);
+		//buttonMoerser = new Button(0, 0, 75, 75);
 		//buttonMainMenuAbout = new Button(75, 350, 200, 50);
 		//buttonAboutExit = new Button(75, 500, 200, 50);
 
@@ -128,19 +158,78 @@ public class Main extends ApplicationAdapter {
 
 	@Override
 	public void render () {
-		camera.zoom += 0.01;
-		camera.update();
+		System.out.println(buttonMainMenuStart.hit(Gdx.input.getX(), Gdx.input.getY()));
+		//playAnimationExplosion(0, 0);
+		ScreenUtils.clear(1, 1, 1, 1);
+		/*camera.position.x += 0.5;
+		camera.update();*/
 		curTime = System.currentTimeMillis();
 		LDB.loadRecords();
 		batch.setProjectionMatrix(camera.combined);
+		if (screenCondition != 2) {
+			camera.position.y = SCR_HEIGHT/2;
+			camera.position.x = SCR_WIDTH/2;
+			camera.update();
+		}
+		/*if (screenCondition !=2 ) {
+			buttonAboutExit.deltaY = (int) camera.position.y;
+			buttonAboutExit.deltaX = (int) camera.position.x;
+			buttonMainMenuStart.deltaY = (int) camera.position.y;
+			buttonMainMenuStart.deltaX = (int) camera.position.x;
+			for (int i = 0; i < missionMark.length; i++) {
+				missionMark[i].deltaY = (int) camera.position.y;
+				missionMark[i].deltaX = (int) camera.position.x;
+			}
+		}*/
+		//System.out.println(camera.position.x + " " + camera.position.y + " ");
 		switch (screenCondition) {
 			case 0: if (buttonMainMenuStart.hit(Gdx.input.getX(), Gdx.input.getY()) & Gdx.input.isTouched()) {
 				screenCondition = 1;
 			} else { batch.begin();
-				//ScreenUtils.clear(1, 1, 1, 1);
+
 				//System.out.println(Gdx.input.getX() + " " +  Gdx.input.getY() + " " + Gdx.input.isTouched());
 				batch.draw(mainMenuScreen, 0, 0, SCR_WIDTH, SCR_HEIGHT);
-				fontMedium.draw(batch, "Play", 75, SCR_HEIGHT-200);
+				mainFont.draw(batch, "Play", 75, SCR_HEIGHT-200);
+				if (explosionTimerHelper >=33) {
+					explosionTimerHelperHelper = 0;
+					explosionTimerHelper= 0;
+				}
+				if (explosionTimerHelper < 4) {
+					explosionTimerHelperHelper = 0;
+				} else if (explosionTimerHelper < 8) {
+					explosionTimerHelperHelper = 1;
+				}else if (explosionTimerHelper < 12) {
+					explosionTimerHelperHelper = 2;
+				}else if (explosionTimerHelper < 16) {
+					explosionTimerHelperHelper = 3;
+				}else if (explosionTimerHelper < 20) {
+					explosionTimerHelperHelper = 4;
+				}else if (explosionTimerHelper < 24) {
+					explosionTimerHelperHelper = 5;
+				}else if (explosionTimerHelper < 28) {
+					explosionTimerHelperHelper = 6;
+				}else if (explosionTimerHelper < 32) {
+					explosionTimerHelperHelper = 7;
+				}
+					/*switch(explosionTimerHelperHelper) {
+						case 0:batch.draw(explosion0, 0, 0, 192, 192);
+							break;
+						case 1:batch.draw(explosion1, 0, 0, 192, 192);
+							break;
+						case 2:batch.draw(explosion2, 0, 0, 192, 192);
+							break;
+						case 3:batch.draw(explosion3, 0, 0, 192, 192);
+							break;
+						case 4:batch.draw(explosion4, 0, 0, 192, 192);
+							break;
+						case 5:batch.draw(explosion5, 0, 0, 192, 192);
+							break;
+						case 6:batch.draw(explosion6, 0, 0, 192, 192);
+							break;
+						case 7:batch.draw(explosion7, 0, 0, 192, 192);
+							break;
+					}
+					explosionTimerHelper++;*/
 				batch.end();
 
 			}
@@ -159,16 +248,52 @@ public class Main extends ApplicationAdapter {
 			batch.end();
 				break;
 			case 2:
+				//System.out.println(camera.position.x + " " + camera.position.y + " ");
 				if (helper == 1) {
 					startMissionTime = System.currentTimeMillis();
 					helper = 0;
 				}
-				float dt = Gdx.graphics.getDeltaTime();
-				if (curTime-startMissionTime >= 20000) {
-					screenCondition = 1;
-					contentCount += 125;
-					LDB.saveRecords();
+				if (helper == 2) {
+					if (Gdx.input.isTouched()) {
+						camera.position.y -= mouseY - Gdx.input.getY();
+						camera.position.x += mouseX - Gdx.input.getX();
+						if (camera.position.y > SCR_HEIGHT/2) {
+							camera.position.y = SCR_HEIGHT/2;
+						}
+						if (camera.position.y < 0) {
+							camera.position.y = 0;
+						}
+						if (camera.position.x < SCR_WIDTH/2) {
+							camera.position.x = SCR_WIDTH/2;
+						}
+						if (camera.position.x > SCR_WIDTH) {
+							camera.position.x = SCR_WIDTH;
+						}
+					}
+					mouseY = Gdx.input.getY();
+					mouseX = Gdx.input.getX();
+					camera.update();
 				}
+				if (helper == 0) {
+					mouseX = Gdx.input.getX();
+					mouseY = Gdx.input.getY();
+					helper = 2;
+				}
+
+
+
+				float dt = Gdx.graphics.getDeltaTime();
+				if (curTime-startMissionTime >= 200000) {
+					screenCondition = 4;
+					helper = 0;
+				}
+
+				/*if (buttonMoerser.hit(Gdx.input.getX(), Gdx.input.getY()) && Gdx.input.isTouched()) {
+					buttonMoerserIsActive = true;
+				}
+				if (buttonMoerserIsActive && Gdx.input.justTouched()) {
+					playAnimationExplosion(Gdx.input.getX(), Gdx.input.getY());
+				}*/
 
 
 
@@ -230,7 +355,7 @@ public class Main extends ApplicationAdapter {
 						if (turretFireDelay[i] <= 0){
 							bullets.add(new Bullet(turret[i].barrelEndX, turret[i].barrelEndY, turret[i].eX, turret[i].eY));
 							one_turret_shoot.play(MAIN_VOLUME);
-							turretFireDelay[i] += 0.2;
+							turretFireDelay[i] += 1;
 						}
 					} else {
 						turretFireDelay[i] = 0;
@@ -252,9 +377,49 @@ public class Main extends ApplicationAdapter {
 				for (Enemy curEnemy : enemy){
 					boolean isCollision = checkForCollision(curEnemy);
 					if (isCollision){
-						curEnemy.spawn();
 						hit.play(MAIN_VOLUME);
-					}
+						/*if (explosionTimerHelper >=33) {
+							if (explosionTimerHelper < 4) {
+								explosionTimerHelperHelper = 0;
+							} else if (explosionTimerHelper < 8) {
+								explosionTimerHelperHelper = 1;
+							}else if (explosionTimerHelper < 12) {
+								explosionTimerHelperHelper = 2;
+							}else if (explosionTimerHelper < 16) {
+								explosionTimerHelperHelper = 3;
+							}else if (explosionTimerHelper < 20) {
+								explosionTimerHelperHelper = 4;
+							}else if (explosionTimerHelper < 24) {
+								explosionTimerHelperHelper = 5;
+							}else if (explosionTimerHelper < 28) {
+								explosionTimerHelperHelper = 6;
+							}else if (explosionTimerHelper < 32) {
+								explosionTimerHelperHelper = 7;
+							}
+							switch(explosionTimerHelperHelper) {
+								case 0:batch.draw(explosion0, curEnemy.x+96, curEnemy.y+96, 192, 192);
+									break;
+								case 1:batch.draw(explosion1, curEnemy.x+96, curEnemy.y+96, 192, 192);
+									break;
+								case 2:batch.draw(explosion2, curEnemy.x+96, curEnemy.y+96, 192, 192);
+									break;
+								case 3:batch.draw(explosion3, curEnemy.x+96, curEnemy.y+96, 192, 192);
+									break;
+								case 4:batch.draw(explosion4, curEnemy.x+96, curEnemy.y+96, 192, 192);
+									break;
+								case 5:batch.draw(explosion5, curEnemy.x+96, curEnemy.y+96, 192, 192);
+									break;
+								case 6:batch.draw(explosion6, curEnemy.x+96, curEnemy.y+96, 192, 192);
+									break;
+								case 7:batch.draw(explosion7, curEnemy.x+96, curEnemy.y+96, 192, 192);
+									break;
+							}
+							explosionTimerHelper++;
+						}*/
+						curEnemy.spawn();
+						}
+
+
 				}
 				//Удалим пули, которые деактивировались после коллизий
 				for (Iterator<Bullet> iterator = bullets.iterator(); iterator.hasNext(); ) {
@@ -281,10 +446,11 @@ public class Main extends ApplicationAdapter {
 					batch.draw(turret[i].targetDot, turret[i].eX, turret[i].eY);
 				}
 				batch.end();
-				/*if (Base.health <= 0) {
+				if (Base.health <= 0) {
 					screenCondition = 3;
-				}*/
+				}
 				break;
+
 			case 3:
 				batch.begin();
 				for (int i = 0; i < enemy.length; i++) {
@@ -297,12 +463,13 @@ public class Main extends ApplicationAdapter {
 					screenCondition = 1;
 				}
 				break;
-			/*case 4:
+			case 4:
 				batch.begin();
 				batch.draw(missionEndScreen, 0, 0, SCR_WIDTH, SCR_HEIGHT);
 				if (helper == 0) {
 					contentCount += 125;
 					helper =1;
+					LDB.saveRecords();
 				}
 
 				for (int i = 0; i < enemy.length; i++) {
@@ -312,7 +479,7 @@ public class Main extends ApplicationAdapter {
 				batch.end();
 				if (Gdx.input.isTouched()) {
 					screenCondition = 1;
-				}*/
+				}
 		}
 		batch.begin();
 		fontMedium.draw(batch, "Res:" + contentCount, 50, SCR_HEIGHT-50);
